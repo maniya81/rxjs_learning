@@ -1,8 +1,42 @@
-import { of } from 'rxjs';
-
+import { Observable } from "rxjs";
 /*
  * Any code samples you want to play with can go in this file.
  * Updates will trigger a live reload on http://localhost:1234/
  * after running npm start.
  */
-of('Hello', 'RxJS').subscribe(console.log);
+
+
+2.
+
+const observer = {
+    next: value => console.log('next', value),
+    error: error => console.log('error', error),
+    complete: () => console.log('complete!')
+  };
+  
+  const observable = new Observable(subscriber => {
+    let count = 0;
+    // Observables can deliver 0:M values synchronous or asynchronously
+    const id = setInterval(() => {
+      subscriber.next(count);
+      // calling complete also invokes the cleanup function you return
+      subscriber.complete();
+      count += 1;
+    }, 1000);
+  
+    /*
+     * You can return a function to clean up any resources that were
+     * created with subscription. In this case, we need to clear 
+     * the active interval. When using RxJS's built in creation operators
+     * this will be handled for us.
+     */
+    return () => {
+      console.log('called');
+      clearInterval(id);
+    };
+  });
+  
+  // adding logs to show observable emitting asynchronously
+  console.log('before');
+  observable.subscribe(observer);
+  console.log('after');
