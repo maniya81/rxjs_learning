@@ -6,45 +6,37 @@ import { Observable } from "rxjs";
  */
 1.
 
+// begin lesson code
+import { fromEvent } from 'rxjs';
+
 const observer = {
-    next: value => console.log('next', value),
-    error: error => console.log('error', error),
-    complete: () => console.log('complete!')
-  };
-  
-  const observable = new Observable(subscriber => {
-    let count = 0;
-  
-    const id = setInterval(() => {
-      subscriber.next(count);
-      count += 1;
-    }, 1000);
-  
-    return () => {
-      console.log('called');
-      clearInterval(id);
-    };
-  });
-  
-  const subscription = observable.subscribe(observer);
-  const subscriptionTwo = observable.subscribe(observer);
-  
+  next: val => console.log('next', val),
+  error: err => console.log('error', err),
+  complete: () => console.log('complete!')
+};
+
+/*
+ *  Create streams from events, given target and event name.
+ */
+const source$ = fromEvent(document, 'keyup');
+
+/*
+ *  Each subscription creates it's own execution path between
+ *  observable and observer (also known as unicasting). So, in this case,
+ *  every subscription will wire up a new event listener.
+ */
+const subOne = source$.subscribe(observer);
+const subTwo = source$.subscribe(observer);
+
+setTimeout(() => {
   /*
-   * Subscriptions can be added together using the add method,
-   * you can then unsubscribe to multiple at the same time.
-   * This is simply personal preference, unsubscribing individually 
-   * will produce the same result. Also, in future lessons, we will see how
-   * to automate this unsubscribe process with operators.
+   *  For long running observables we need to make sure to clean
+   *  them up when we are finished to prevent memory leaks and
+   *  unintended behavior. In this case, we are cleaning up
+   *  one subscription but not the other, leaving it active.
+   *  We will learn different techniques to automate this
+   *  process in an upcoming lesson.
    */
-  subscription.add(subscriptionTwo);
-  
-  setTimeout(() => {
-   /*
-    * Note: Calling unsubscribe will not fire your complete callback,
-    * but the returned function will be invoked cleaning up any
-    * resources that were created by the subscription - in this
-    * case the interval.
-    */
-    subscription.unsubscribe();
-  }, 3500);
-  
+  console.log('unsubscribing');
+  subOne.unsubscribe();
+}, 3000);
